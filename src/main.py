@@ -5,18 +5,22 @@ import loader
 
 from config import params
 from metrics import get_metrics
-
+import pdb
 
 def run(**kwargs):
     # load graph
+    # pdb.set_trace()
+    print("Load graph...")
     graph_nx, dump_folder = loader.load_dataset(kwargs['dataset'])
 
     # initialize tNodeEmbed
+    print("initialize tNodeEmbed...")
     task = kwargs['task']
     test_size = kwargs['test_size']
     tnodeembed = models.tNodeEmbed(graph_nx, task=task, dump_folder=dump_folder, test_size=test_size, **kwargs['n2vargs'])
 
     # load dataset
+    print("load dataset...")
     X, y = tnodeembed.get_dataset(train_skip=kwargs['train_skip'])
 
     # fit

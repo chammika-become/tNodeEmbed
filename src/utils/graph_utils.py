@@ -4,7 +4,7 @@ import networkx as nx
 
 import warnings
 from tqdm import tqdm
-
+import pdb
 
 def random_false_edges(graph_nx, num):
     '''
@@ -85,6 +85,9 @@ def get_graph_T(graph_nx, min_time=-np.inf, max_time=np.inf, return_df=False):
                 raise Exception('attribute keys in \'get_graph_T\' are different')
             attr_keys = attr.keys()
 
+    if attr_keys == []:
+      print("Ouch")
+      pdb.set_trace()
     graph_df = pd.DataFrame(relevant_edges, columns=['from', 'to', *attr_keys])
 
     if return_df:
@@ -151,7 +154,7 @@ def get_pivot_time(graph_nx, wanted_ratio=0.2, min_ratio=0.1):
         return times[-1]
 
     time2dist_from_ratio = {}
-    for time in times[int(len(times) / 3):]:
+    for time in times[int(len(times) / 3):-1]:
         train_graph_nx = multigraph2graph(get_graph_T(graph_nx, max_time=time))
         num_edges_train = len(train_graph_nx.edges())
 
@@ -166,9 +169,9 @@ def get_pivot_time(graph_nx, wanted_ratio=0.2, min_ratio=0.1):
             continue
 
         time2dist_from_ratio[time] = np.abs(wanted_ratio - current_ratio)
+        print("Time : {} : current ratio : {} |0.2 - cr| {}".format(time, current_ratio, time2dist_from_ratio[time]))
 
     pivot_time = min(time2dist_from_ratio, key=time2dist_from_ratio.get)
-
     print(f'pivot time {pivot_time}, is close to the wanted ratio by {round(time2dist_from_ratio[pivot_time], 3)}')
 
     return pivot_time

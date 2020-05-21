@@ -5,7 +5,8 @@ from datetime import datetime
 import networkx as nx
 import pandas as pd
 
-
+def dateparse(time_in_secs):
+    return datetime.fromtimestamp(float(time_in_secs))
 
 def load_dataset(dataset_name):
     '''
@@ -26,6 +27,15 @@ def load_dataset(dataset_name):
         graph_df = graph_df[~pd.isnull(graph_df['discovery date'])]
         graph_df['time'] = graph_df['discovery date'].map(lambda x: eval(x).year)
         graph_df.rename({'id1': 'from', 'id2': 'to'}, axis='columns', inplace=True)
+        graph_nx = nx.from_pandas_edgelist(graph_df, 'from', 'to', edge_attr=['time'], create_using=nx.Graph())
+    elif dataset_name == 'Facebook':
+        graph_path = join(folder_path, "facebook-wall.txt")
+        graph_df = pd.read_csv(graph_path, sep='\t', header=None, names=['from', 'to', 'timestamp'], parse_dates=[2],
+                               date_parser=dateparse)
+        graph_df = graph_df[~pd.isnull(graph_df['timestamp'])]
+        # Get monthly granularity
+        # graph_df['time'] = graph_df['timestamp'].map(lambda d: d.year*100+ d.month)   # YYYYmm
+        graph_df['time'] = graph_df['timestamp'].map(lambda d: (d.year * 100 + d.month) - 200409)  # 0, 1, 2, ...
         graph_nx = nx.from_pandas_edgelist(graph_df, 'from', 'to', edge_attr=['time'], create_using=nx.Graph())
     else:
         raise Exception('dataset not available')
